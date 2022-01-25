@@ -8,4 +8,6 @@ private[db] trait EmployeeRepository {
   def addEmployee(employee:Employee):Int
   def findEmployeeByID(employeeId:UUID):Option[Employee]
   def updateEmployee(employeeId:UUID,employee:Employee):Int
+  def deleteEmployee(employeeId:UUID):Int
+
 }

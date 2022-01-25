@@ -21,14 +21,11 @@ content-type: application/json
 
 
 ###
-PUT http://localhost:8080/api/v1/employee/aa87dfcc-6f17-4656-9fd6-51fb30f47 HTTP/1.1
-content-type: application/json
-
-{
- "employeeId":"e5a777c4-b664-4335-aa1d-7c9bd62fdba",
-  "firstName":"Cristino" ,
-  "lastName":"Ronaldo",
-  "email":"ronaldo@gmail.com"
-}
+DELETE  http://localhost:8080/api/v1/employee/96f13235-6661-4136-9942-394925089593 HTTP/1.1
 
 
+
+
+
+###
+curl -X DELETE http://localhost:8080/api/v1/employee/60a17f54-8307-46c9-843a-133ce2cb89ab

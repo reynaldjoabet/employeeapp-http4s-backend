@@ -62,4 +62,13 @@ ctx.run(q).headOption
 ctx.run(q).toInt
     
   }
+
+
+
+  def deleteEmployee(employeeId:UUID):Int={
+      val q=quote{
+          query[Employee].filter(_.employeeId==lift(employeeId)).delete
+      }
+      ctx.run(q).toInt
+  }
 }
