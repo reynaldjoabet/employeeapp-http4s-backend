@@ -1,9 +1,8 @@
 import cats.effect.IOApp
 import cats.effect.{ExitCode, IO}
-import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.HttpRoutes
 import org.http4s.server.Router
-import routes._
+import routes.EmployeeRoutes
 import cats.effect.Resource
 import org.http4s.server.Server
 import org.http4s.server.middleware.CORS
@@ -11,7 +10,7 @@ import org.http4s.server.middleware.CORSConfig
 import org.http4s.server.middleware.Logger
 import org.http4s.headers.Origin
 import org.http4s.Uri
-import org.http4s.Method
+import org.http4s.Method._
 import org.http4s.server.middleware.CSRF
 import org.http4s.server.middleware.HSTS
 import org.http4s.server.middleware.ResponseTiming
@@ -29,91 +28,98 @@ import org.http4s.HttpApp
 import org.http4s.server.middleware.RequestLogger
 import org.http4s.server.middleware.ResponseLogger
 import org.http4s.websocket.WebSocket
+import org.typelevel.ci._
+import org.http4s.ember.server.EmberServerBuilder
+import com.comcast.ip4s._
+import org.http4s.headers.Origin
+import org.http4s.headers
+import org.http4s.headers
+import service.DoobieService
+import db._
+import org.http4s.Status
+import config.AppConfiguration
+object ServerApp extends IOApp {
 
-
-
-object ServerApp  extends IOApp{
-
-     val httpRoutes=EmployeeRoutes.httpRoutes
-
-     val routes= Router(
-         "/api/v1"->httpRoutes
-     )
-
-
-/*
-val cookieName = "csrf-token"
-  val defaultOriginCheck: Request[IO] => Boolean =CSRF.defaultOriginCheck[IO](_, "localhost", Uri.Scheme.http, None)
-
-  val csrfBuilder = for{
-        key  <- CSRF.generateSigningKey[IO]
- 
-          }yield CSRF[IO,IO](key, defaultOriginCheck)
-
-  
-val csrf = csrfBuilder.map(
-  _.withCookieName(cookieName)
-  .withCookieDomain(Some("localhost"))
-  .withCookiePath(Some("/"))
-  .withCookieHttpOnly(false)
-  .build
-)
-*/
-
-
-def auth(http:HttpRoutes[IO])=Kleisli{ request:Request[IO]=>
-
-    request.headers.get[Authorization].collect{
-         case Authorization(Credentials.Token(AuthScheme.Bearer,token)) => token
+  def auth(http: HttpRoutes[IO]) = Kleisli { request: Request[IO] =>
+    request.headers.get[Authorization].collect {
+      case Authorization(Credentials.Token(AuthScheme.Bearer, token)) => token
     }
-http(request)
-}
+    http(request)
+  }
 
+  def CSPService(service: HttpRoutes[IO]) = Kleisli { request: Request[IO] =>
+    service(request).map(
+      _.putHeaders(
+        Header(
+          "Content-Security-Policy",
+          "default-src http://localhost:4000 ; form-action 'self'; script-src 'self'"
+        )
+      )
+    )
+  }
 
-     def CSP(service:HttpRoutes[IO])=Kleisli{ request:Request[IO]=>
-        service(request).map(_.putHeaders(Header("Content-Security-Policy","default-src http://localhost:3000 ; form-action 'self'; script-src 'self'")))
-     }
+  private val corsService = CORS.policy
+    .withAllowOriginHost(
+      Set(Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"), Some(3000)))
+    )
+    .withAllowMethodsIn(Set(POST, PUT, GET, DELETE, OPTIONS))
+    .withAllowCredentials(
+      true
+    ) // set to true for csrf// The default behavior of cross-origin resource requests is for
+    // requests to be passed without credentials like cookies and the Authorization header
+    .withAllowHeadersIn(Set(ci"X-Csrf-Token", ci"Content-Type"))
 
-val config = CORSConfig.default
-  .withAnyOrigin(false)
-  .withAllowCredentials(false)
-  .withAllowedMethods(Some(Set(Method.POST,Method.PUT,Method.GET,Method.OPTIONS,Method.DELETE)))
-  .withAllowedOrigins(Set("http://localhost:3000"))
-  
+  // val corsApp: Http[IO, IO] = CORS(CSP(routes).orNotFound, config)
+  // val hstsApp: Kleisli[IO, Request[IO], Response[IO]] = HSTS(corsApp)
 
-val corsApp: Http[IO,IO] = CORS(CSP(routes).orNotFound, config)
-val hstsApp: Kleisli[IO,Request[IO],Response[IO]]=HSTS(corsApp)
-
-private val loggers: HttpApp[IO] => HttpApp[IO] = {
+  val csrfService = CSRF
+    .withGeneratedKey[IO, IO](request =>
+      CSRF.defaultOriginCheck(request, "localhost", Uri.Scheme.http, Some(3000))
+    )
+    .map(builder =>
+      builder
+        .withCookieName("csrf-token")
+        .withCookieHttpOnly(false)
+        .withCookieDomain(Some("localhost"))
+        .withCookiePath(Some("/"))
+        // .withCookieSecure(true)
+        .build
+        .validate()
+    )
+  private val loggers: HttpApp[IO] => HttpApp[IO] = {
     { http: HttpApp[IO] =>
-      RequestLogger.httpApp(true, true)(http)
+      RequestLogger.httpApp(true, true, _ => false)(http)
     } andThen { http: HttpApp[IO] =>
-      ResponseLogger.httpApp(true, true)(http)
+      ResponseLogger.httpApp(true, true, _ => false)(http)
     }
   }
-/*
-val corsApp=CORS.policy
-                             .withAllowOriginHost(Set(Origin.Host(Uri.Scheme.http, Uri.RegName("localhost"),Some(3000))))
-                             //.withAllowOriginAll
-                             .withAllowMethodsIn(Set(Method.POST,Method.PUT,Method.GET,Method.DELETE))
-                             .withAllowCredentials(false) (routes).orNotFound
-*/
 
+  val server: Resource[IO, Server] =
+    Resource
+      .eval(csrfService)
+      .flatMap(service =>
+        EmployeeRoutes.routes.map(httpRoutes => (httpRoutes, service))
+      )
+      .flatMap { case (httpRoutes, service) =>
+        EmberServerBuilder
+          .default[IO]
+          .withHost(host"localhost")
+          .withPort(port"8084")
+          .withHttpApp(loggers(service(corsService(httpRoutes.orNotFound))))
+          .build
+      }
 
-
-
-val server=BlazeServerBuilder[IO]
-           .bindHttp(8080,"localhost")
-          .withHttpApp(ResponseTiming(hstsApp))
-          .resource
-                                        
-                                                                   /*
-                                                                                     server.useForever
-                                                                                     .as(ExitCode.Success)
-                                                                  */
-  
-            override def run(args: List[String]): IO[ExitCode] =   server.use(_=>IO.never)
-                                                                          .as(ExitCode.Success)
-
+  override def run(args: List[String]): IO[ExitCode] =
+             DBMigration
+             .migrate() *>server.useForever
+          .race(
+            IO.println("Press Any Key to stop the  server") *> IO.readLine
+              .handleErrorWith(e =>
+                IO.println(s"There was an error! ${e.getMessage}")
+              ) *> IO.println(
+              "Stopping Server"
+            ) 
+          )*> DBMigration.reset()
+          .as(ExitCode.Success)
 
 }

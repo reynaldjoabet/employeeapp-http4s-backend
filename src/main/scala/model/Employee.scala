@@ -2,24 +2,24 @@ package model
 
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.Codec
-import org.http4s.circe.{jsonEncoderOf,jsonOf}
+import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import cats.effect.IO
 import org.http4s.EntityEncoder
 import org.http4s.EntityDecoder
-import java.util.UUID
 
 final case class Employee(
-  employeeId:UUID,
-firstName:String,
-  lastName:String,
-    email:String
-    )
+    employeeId: Int,
+    firstName: String,
+    lastName: String,
+    email: String
+)
 
+object Employee {
+  implicit val codec: Codec[Employee] = deriveCodec[Employee]
+  implicit val listEntityEncoder: EntityEncoder[IO, List[Employee]] =
+    jsonEncoderOf[IO, List[Employee]]
+  implicit val entityEncoder: EntityEncoder[IO, Employee] =
+    jsonEncoderOf[IO, Employee]
+  implicit val entityDecoder: EntityDecoder[IO, Employee] = jsonOf[IO, Employee]
 
-    object  Employee{
-        implicit  val codec:Codec[Employee]=deriveCodec[Employee]
-    implicit val listEntityEncoder: EntityEncoder[IO,List[Employee]]=jsonEncoderOf[IO,List[Employee]]
-    implicit val entityEncoder: EntityEncoder[IO,Employee]=jsonEncoderOf[IO,Employee]
-    implicit val entityDecoder: EntityDecoder[IO,Employee]=jsonOf[IO,Employee]
-    
-    }
+}

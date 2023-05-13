@@ -3,44 +3,66 @@ package routes
 import org.http4s.dsl.Http4sDsl
 import cats.effect.IO
 import org.http4s.HttpRoutes
-import db.H2EmployeeRepository
+import service.H2EmployeeRepository
 import model._
-import org.http4s.circe.{jsonOf,jsonEncoderOf}
+import org.http4s.circe.{jsonOf, jsonEncoderOf}
 import io.circe.Json
 import java.util.UUID
+import scala.util.Random
+import org.http4s.websocket.WebSocket
+import service.DoobieService
+import cats.effect.kernel.Async
+import service.EmployeeService
+import cats.effect.kernel.Resource
+import org.http4s.server.Router
+import cats.effect
+case class EmployeeRoutes private (service: EmployeeService[IO])
+    extends Http4sDsl[IO] {
 
+  private val httpRoutes = HttpRoutes.of[IO] {
+    case GET -> Root / "employees" => service.getAllEmployees().flatMap(Ok(_))
 
-object EmployeeRoutes extends Http4sDsl[IO] {
-   implicit val  decoder=jsonOf[IO,Json]
-   implicit val  encoder=jsonEncoderOf[IO,Json]
+    case request @ POST -> Root / "addEmployee" =>
+      request
+        .as[CreateEmployee]
+        .flatMap { createEmployee =>
+          service
+            .addEmployee(createEmployee)
+            .flatMap(_ => Created())
 
-    val httpRoutes= HttpRoutes.of[IO]{
-        case GET-> Root/"employees" =>Ok(H2EmployeeRepository.getAllEmployees())
+        }
+        .handleErrorWith(_ => BadRequest(" Failed to created employee"))
 
-        case request@POST -> Root/"addEmployee" => request.as[Json].map{ data=>
-                                               Employee(UUID.randomUUID(),data.\\("firstName").head.toString().replaceAll("\"",""),
-                                               data.\\("lastName").head.toString().replaceAll("\"",""),
-                                               data.\\("email").head.toString().replaceAll("\"",""))
-                                               }.flatMap{employee=>
-                                                  if(H2EmployeeRepository.addEmployee(employee)==1) 
-                                            Created()
-                                                  else
-                                            BadRequest(" Failed to created employee")
-                                                }
-        
-case GET->Root /"employee"/UUIDVar(employeeId)=>H2EmployeeRepository.findEmployeeByID(employeeId).fold(NotFound())(employee=>Ok(employee))
+    case GET -> Root / "employee" / IntVar(employeeId) =>
+      service
+        .findEmployeeByID(employeeId)
+        .flatMap(employee => Ok(employee))
+        .handleErrorWith(_ => NotFound())
 
+    case request @ PUT -> Root / "employee" / IntVar(employeeId) =>
+      request.as[Employee].flatMap { employee =>
+        if (employeeId == employee.employeeId) {
+          service
+            .updateEmployee(employeeId, employee)
+            .flatMap(employee => Created(employee))
+            .handleErrorWith(_ => BadRequest())
+        } else Forbidden()
 
-case request@PUT-> Root/"employee"/UUIDVar(employeeId)=>  request.as[Employee].flatMap{employee=>
-    if(employeeId==employee.employeeId) {
-if(H2EmployeeRepository.updateEmployee(employeeId,employee)>0) Created(employee) else BadRequest()
-    } else  Forbidden()
+      }
 
+    case req @ DELETE -> Root / "employee" / IntVar(employeeId) =>
+      service
+        .deleteEmployee(employeeId)
+        .flatMap(_ => Ok(EmployeeStatus(true)))
+        .handleErrorWith(_ =>
+          NotFound(s"Employee with ${employeeId} does not exists")
+        )
 
+  }
+  val routes: HttpRoutes[IO] = Router("/api/v1" -> httpRoutes)
 }
 
-  case req@DELETE->Root /"employee"/UUIDVar(employeeId)  => if(H2EmployeeRepository.deleteEmployee(employeeId)>0) Ok(EmployeeStatus(true)) else NotFound(s"Employee with ${employeeId} does not exists")     
-    
-  
-}
+object EmployeeRoutes {
+  val routes: Resource[IO, HttpRoutes[IO]] =
+    DoobieService.service[IO].map(service => EmployeeRoutes(service).routes)
 }
