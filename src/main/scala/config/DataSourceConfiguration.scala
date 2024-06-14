@@ -3,11 +3,11 @@ package config
 import ciris.ConfigDecoder
 
 final case class DataSourceConfiguration private (
-    databaseName: String,
-    user: String,
-    password: String,
-    portNumber: Int,
-    serverName: String
+  databaseName: String,
+  user: String,
+  password: String,
+  portNumber: Int,
+  serverName: String
 )
 
 object DataSourceConfiguration {

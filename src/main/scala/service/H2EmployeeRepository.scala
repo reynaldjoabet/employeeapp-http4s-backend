@@ -1,8 +1,11 @@
 package service
-import io.getquill.H2JdbcContext
-import io.getquill.CamelCase
-import model.Employee
+
 import java.util.UUID
+
+import io.getquill.CamelCase
+import io.getquill.H2JdbcContext
+import model.Employee
+
 object H2EmployeeRepository extends EmployeeRepository {
 
   private object ctx extends H2JdbcContext(CamelCase, "database")
@@ -48,9 +51,7 @@ object H2EmployeeRepository extends EmployeeRepository {
 
   def updateEmployee(employeeId: Int, employee: Employee): Int = {
     val q = quote {
-      query[Employee]
-        .filter(_.employeeId == lift(employeeId))
-        .update(lift(employee))
+      query[Employee].filter(_.employeeId == lift(employeeId)).update(lift(employee))
     }
     ctx.run(q).toInt
 
@@ -62,4 +63,5 @@ object H2EmployeeRepository extends EmployeeRepository {
     }
     ctx.run(q).toInt
   }
+
 }
