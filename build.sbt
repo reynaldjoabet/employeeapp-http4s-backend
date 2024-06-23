@@ -3,7 +3,7 @@
 scalaVersion := "2.13.10"
 
 version := "1.0"
-val postgresVersion                   = "42.5.4"
+val postgresVersion                   = "42.5.6"
 val cirisVersion                      = "2.4.0"
 val Http4s                            = "0.23.18"
 val Circe                             = "0.14.1"
