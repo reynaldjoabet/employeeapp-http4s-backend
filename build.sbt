@@ -34,7 +34,7 @@ lazy val root = (project in file(".")).settings(
     "ch.qos.logback" % "logback-classic"     % Logback,
     "io.circe"      %% "circe-generic"       % Circe,
     "com.h2database" % "h2"                  % "2.0.204",
-    "io.getquill"   %% "quill-jdbc"          % "3.12.0",
+    "io.getquill"   %% "quill-jdbc"          % "3.19.0",
     doobie,
     doobie_hikari,
     flyway,
