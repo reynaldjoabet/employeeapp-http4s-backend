@@ -5,12 +5,10 @@ scalaVersion := "2.13.13"
 version := "1.0"
 
 val postgresVersion                   = "42.5.6"
-val postgresVersion                   = "42.5.4"
 val cirisVersion                      = "3.6.0"
 val Http4s                            = "0.23.18"
 val Circe                             = "0.14.1"
 val doobieVersion                     = "1.0.0-RC5"
-val Logback                           = "1.2.13"
 val logbackVersion                    = "1.4.14"
 
 val doobie_hikari                     = "org.tpolecat"        %% "doobie-hikari"   % doobieVersion
