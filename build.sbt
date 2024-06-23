@@ -27,10 +27,10 @@ val cirisCore = ciris("ciris")
 lazy val root = (project in file(".")).settings(
   name := "EmployeeApp",
   libraryDependencies ++= Seq(
-    "org.http4s"    %% "http4s-dsl"          % "0.23.18",
-    "org.http4s"    %% "http4s-circe"        % "0.23.18",
-    "org.http4s"    %% "http4s-core"         % "0.23.18",
-    "org.http4s"    %% "http4s-ember-server" % "0.23.18",
+    "org.http4s"    %% "http4s-dsl"          % "0.23.27",
+    "org.http4s"    %% "http4s-circe"        % "0.23.27",
+    "org.http4s"    %% "http4s-core"         % "0.23.27",
+    "org.http4s"    %% "http4s-ember-server" % "0.23.27",
     "ch.qos.logback" % "logback-classic"     % Logback,
     "io.circe"      %% "circe-generic"       % Circe,
     "com.h2database" % "h2"                  % "2.0.206",
