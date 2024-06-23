@@ -1,6 +1,6 @@
 // The simplest possible sbt build file is just one line:
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.13"
 
 version := "1.0"
 val postgresVersion                   = "42.5.4"
