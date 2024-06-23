@@ -10,6 +10,7 @@ val Circe                             = "0.14.1"
 val doobieVersion                     = "1.0.0-RC5"
 val Logback                           = "1.2.13"
 val logbackVersion                    = "1.4.14"
+
 val doobie_hikari                     = "org.tpolecat"        %% "doobie-hikari"   % doobieVersion
 val flywayVersion                     = "9.22.3"
 val flyway                            = "org.flywaydb"         % "flyway-core"     % flywayVersion
