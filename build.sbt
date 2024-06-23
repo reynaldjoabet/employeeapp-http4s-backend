@@ -15,7 +15,7 @@ val flywayVersion                     = "9.8.3"
 val flyway                            = "org.flywaydb"         % "flyway-core"     % flywayVersion
 val doobie                            = "org.tpolecat"        %% "doobie-core"     % doobieVersion
 val logback                           = "ch.qos.logback"       % "logback-classic" % logbackVersion
-val ciris_hocon                       = "lt.dvim.ciris-hocon" %% "ciris-hocon"     % "1.0.1"
+val ciris_hocon                       = "lt.dvim.ciris-hocon" %% "ciris-hocon"     % "1.2.0"
 val postgres                          = "org.postgresql"       % "postgresql"      % postgresVersion
 def ciris(artifact: String): ModuleID = "is.cir"              %% artifact          % cirisVersion
 
