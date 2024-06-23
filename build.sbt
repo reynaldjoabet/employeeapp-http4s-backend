@@ -32,7 +32,6 @@ lazy val root = (project in file(".")).settings(
     "org.http4s"    %% "http4s-circe"        % "0.23.27",
     "org.http4s"    %% "http4s-core"         % "0.23.27",
     "org.http4s"    %% "http4s-ember-server" % "0.23.27",
-    "ch.qos.logback" % "logback-classic"     % Logback,
     "io.circe"      %% "circe-generic"       % Circe,
     "io.getquill"   %% "quill-jdbc"          % "3.19.0",
     "com.h2database" % "h2"                  % "2.0.206"
