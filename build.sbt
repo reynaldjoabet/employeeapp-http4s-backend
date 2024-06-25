@@ -4,15 +4,15 @@ scalaVersion := "2.13.13"
 
 version := "1.0"
 
-val postgresVersion                   = "42.5.6"
-val cirisVersion                      = "3.6.0"
-val Http4s                            = "0.23.18"
-val Circe                             = "0.14.1"
-val doobieVersion                     = "1.0.0-RC5"
-val logbackVersion                    = "1.4.14"
+val postgresVersion = "42.5.6"
+val cirisVersion    = "3.6.0"
+val Http4s          = "0.23.18"
+val Circe           = "0.14.1"
+val doobieVersion   = "1.0.0-RC5"
+val logbackVersion  = "1.4.14"
 
 val doobie_hikari                     = "org.tpolecat"        %% "doobie-hikari"   % doobieVersion
-val flywayVersion                     = "9.22.3"
+val flywayVersion                     = "10.15.0"
 val flyway                            = "org.flywaydb"         % "flyway-core"     % flywayVersion
 val doobie                            = "org.tpolecat"        %% "doobie-core"     % doobieVersion
 val logback                           = "ch.qos.logback"       % "logback-classic" % logbackVersion
