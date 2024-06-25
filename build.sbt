@@ -4,12 +4,12 @@ scalaVersion := "2.13.13"
 
 version := "1.0"
 
-val postgresVersion                   = "42.5.6"
-val cirisVersion                      = "3.6.0"
-val Http4s                            = "0.23.18"
-val Circe                             = "0.14.1"
-val doobieVersion                     = "1.0.0-RC5"
-val logbackVersion                    = "1.4.14"
+val postgresVersion = "42.5.6"
+val cirisVersion    = "3.6.0"
+val Http4s          = "0.23.18"
+val Circe           = "0.14.1"
+val doobieVersion   = "1.0.0-RC5"
+val logbackVersion  = "1.4.14"
 
 val doobie_hikari                     = "org.tpolecat"        %% "doobie-hikari"   % doobieVersion
 val flywayVersion                     = "9.22.3"
@@ -34,7 +34,7 @@ lazy val root = (project in file(".")).settings(
     "org.http4s"    %% "http4s-ember-server" % "0.23.27",
     "io.circe"      %% "circe-generic"       % Circe,
     "io.getquill"   %% "quill-jdbc"          % "3.19.0",
-    "com.h2database" % "h2"                  % "2.0.206",
+    "com.h2database" % "h2"                  % "2.2.224",
     doobie,
     doobie_hikari,
     flyway,
